@@ -1,0 +1,77 @@
+<head>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.11.0.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .js-plotly-plot .plotly .cursor-move {
+            cursor: pointer;
+        }
+
+        .js-plotly-plot .plotly .cursor-ns-resize {
+            cursor: inherit;
+        }
+
+        .js-plotly-plot .plotly .cursor-ew-resize {
+            cursor: inherit;
+        }
+    </style>
+    <script src="index.js"></script>
+</head>
+
+<body>
+    <div id="myPlot" style="width: 40vw;height: 40vh;"></div>
+    <script>
+        var x_boundary = 20
+        var y_boundary = 20
+        var x = [];
+        var y = [];
+        var traces = (x, y) => [{
+            x: x,
+            y: y,
+            mode: 'markers',
+            type: 'scatter'
+        }];
+        var layout = {
+            plot_bgcolor: "rgba(128,128,128,0.5)",
+            xaxis: {
+                range: [0, x_boundary],
+                autorange: false,
+                fixedrange: true
+            },
+            yaxis: {
+                range: [0, y_boundary],
+                autorange: false,
+                fixedrange: true
+            },
+            hovermode: 'closest'
+        }
+
+        var myPlot = document.getElementById('myPlot')
+        Plotly.newPlot('myPlot', traces(x, y), layout, { displayModeBar: false });
+
+        Number.prototype.between = function (min, max) {
+            return this >= min && this <= max;
+        };
+
+
+        d3.select(".plotly").on('click', function (d, i) {
+            console.log("d3 click")
+            var e = d3.event;
+            var bgrect = document.getElementsByClassName('gridlayer')[0].getBoundingClientRect();
+            var new_x = ((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0];
+            var new_y = ((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1];
+
+            if (new_x > x_boundary) {
+                new_x = x_boundary
+            }
+
+            if (new_y > y_boundary) {
+                new_y = y_boundary
+            }
+            x.push(new_x)
+            y.push(new_y)
+
+            Plotly.newPlot('myPlot', traces(x, y), layout, { displaymodbar: false });
+        });
+    </script>
+</body>
